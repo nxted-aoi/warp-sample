@@ -1,5 +1,12 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct Tag {
+    /// {"name"=>"Ruby", "versions"=>["0.0.1"]}
+    name: String,
+    versions: Vec<f32>,
+}
+
 /// Represents an item posted from a user
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Item {
@@ -61,7 +68,7 @@ pub struct Item {
     /// A list of tags
     /// Example: [{"name"=>"Ruby", "versions"=>["0.0.1"]}]
     /// Type: array
-    tags: Vec<String>,
+    tags: Vec<Tag>,
 
     /// The title of this item
     /// Example: "Example title"
