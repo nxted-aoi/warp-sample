@@ -1,6 +1,5 @@
 use std::{str::FromStr, sync::Arc};
 
-use axum::Router;
 use dotenv::dotenv;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_program::pubkey::Pubkey;
@@ -11,7 +10,7 @@ async fn main() {
     dotenv().ok();
 
     let rpc_url = std::env::var("RPC_URL").expect("RPC_URL must be set.");
-    let program_id = std::env::var("PROGRAM_ID").expect("RPC_URL must be set.");
+    let program_id = std::env::var("PROGRAM_ID").expect("PROGRAM_ID must be set.");
 
     let rpc_client = RpcClient::new(rpc_url);
 
