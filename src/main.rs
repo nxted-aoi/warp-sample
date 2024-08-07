@@ -1,36 +1,26 @@
-use futures::future::join_all;
-use reqwest::{self, Client, Url};
-use std::time::Duration;
-use tokio::time::sleep;
+use std::{str::FromStr, sync::Arc};
+
+use axum::Router;
+use dotenv::dotenv;
+use solana_client::nonblocking::rpc_client::RpcClient;
+use solana_program::pubkey::Pubkey;
+use warp_sample::{router, RouterState};
 
 #[tokio::main]
 async fn main() {
-    let base_url = "https://qiita.com/api/v2/items?page=1&per_page=20";
-    let client = Client::new();
-    // let range: Vec<u16> = (0..699).collect();
-    // let last = range.last().unwrap();
+    dotenv().ok();
 
-    // let mut pub_keys = String::new();
-    // for val in range.clone() {
-    //     if val == *last {
-    //         pub_keys.push_str("0xb89bebc699769726a318c8e9971bd3171297c61aea4a6578a7a4f94b547dcba5bac16a89108b6b6a1fe3695d1a874a0b");
-    //     } else {
-    //         pub_keys.push_str("0xb89bebc699769726a318c8e9971bd3171297c61aea4a6578a7a4f94b547dcba5bac16a89108b6b6a1fe3695d1a874a0b,");
-    //     }
-    // }
+    let rpc_url = std::env::var("RPC_URL").expect("RPC_URL must be set.");
+    let program_id = std::env::var("PROGRAM_ID").expect("RPC_URL must be set.");
 
-    // let params = [("id", pub_keys)];
+    let rpc_client = RpcClient::new(rpc_url);
 
-    // let res = client
-    //     .get(Url::parse(base_url).unwrap())
-    //     .query(&params)
-    //     .send()
-    //     .await
-    //     .unwrap();
-    let url = format!("{}", base_url);
-    // println!("url: {}", url);
+    let state = Arc::new(RouterState {
+        program_id: Pubkey::from_str(&program_id).expect("Fail to read program_id"),
+        rpc_client,
+    });
 
-    let res = reqwest::get(url).await.unwrap();
-
-    println!("{:?}", res.text().await.unwrap());
+    let app = router::get_routes(state);
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
